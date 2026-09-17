@@ -6,6 +6,10 @@ Given a samples x genes table (Excel, CSV or TSV), birgraph binarises each gene 
 
 The StepMiner threshold search and the binomial sparse-quadrant test are adapted from the code of BIRDNet (arXiv:2605.28739). PyTorch is not needed.
 
+Also see: BIRDNet [GitHub](https://github.com/MAHI-Group/BIRDNet) and the official paper at [CIKM 2026](https://github.com/MAHI-Group/BIRDNet).
+
+If you use BIR-Graph repository in your research, please [cite our BIRDNet paper](https://github.com/MAHI-Group/BIRDNet#citation).
+
 ## Installation
 
 Python 3.9 or later.
