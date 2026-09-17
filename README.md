@@ -1,10 +1,10 @@
-# birgraph
+# BIR-Graph
 
-Boolean implication networks of genes and gene clusters from an expression table.
+Boolean implication networks of genes and gene clusters from an expression table (Python package `birgraph`).
 
 Given a samples x genes table (Excel, CSV or TSV), birgraph binarises each gene with StepMiner, tests every gene pair for the six Boolean implication relationships of Sahoo et al. (2008), estimates false discovery rates by permutation, groups genes into clusters, derives cluster-level relations, and writes figures, interactive network viewers and tables.
 
-The StepMiner threshold search and the binomial sparse-quadrant test are adapted from the BIRDNet code (https://github.com/tirtharajdash/BI-DNN). PyTorch is not needed.
+The StepMiner threshold search and the binomial sparse-quadrant test are adapted from the code of BIRDNet (arXiv:2605.28739). PyTorch is not needed.
 
 ## Installation
 
@@ -32,7 +32,7 @@ It removes the `_N` (nuclear fraction) suffix from protein names and prints the 
 
 Choices made for this dataset:
 
-- Mouse level. The UCI description says each measurement can be treated as an independent sample. For Boolean implications, the replicate table counts every mouse 15 times; S and the group-test p-values grow with the number of rows, so replicate-level results look more significant than 72 mice support. The mouse-level table is the main demo. Running the same command on the replicate table shows the difference.
+- Mouse level. The UCI description says each measurement can be treated as an independent sample. For Boolean implications, the replicate table counts every mouse 15 times; S grows and the group-test p-values shrink as rows are added, so replicate-level results look more significant than 72 mice support. The mouse-level table is the main demo. Running the same command on the replicate table shows the difference.
 - Margin. The default margin of 0.5 comes from log2 microarray data (Sahoo et al., 2008). For these protein measurements, `--margin-sd 0.25` sets each protein's margin to a quarter of its robust standard deviation instead. Check `frac_intermediate` in `genes.csv` and `stepminer_examples.png`, and change the value if many proteins fail the dynamic-range filter.
 - Sample size. With 72 mice, a quadrant can be called sparse only if more than 9 mice are expected in it (see Practical notes), so relations are found mainly between proteins whose high and low groups are not too unbalanced.
 - Annotations. Treatment, Behavior and class are dropped with a warning unless one is given as `--group-col`; `--group-col class` compares the eight classes with Kruskal-Wallis tests.
@@ -44,6 +44,7 @@ Choices made for this dataset:
 - For a genes x samples table, add `--genes-as-rows`.
 - Values should be on a log2 scale: log2 intensities for microarrays, log2(TPM + 1) or log2(CPM + 1) for RNA-seq. For unlogged counts, add `--log2`, which applies log2(x + 1). The default margin of 0.5 assumes log2 units; `--margin-sd` does not depend on units.
 - To restrict the analysis: `--gene-list genes.txt` (one gene per line), `--top-var N` (most variable genes), `--subset Tumour` (only samples of one group).
+- All options: `python run_birgraph.py --help`.
 
 ## Method
 
@@ -72,17 +73,17 @@ Choices made for this dataset:
 | File | Content |
 |---|---|
 | `birgraph_report.xlsx` | Sheets summary, genes, relations, fdr, clusters, cluster_relations. Tables longer than 200,000 rows are truncated here; the CSV files are complete. |
-| `relations.csv` | One row per related gene pair: relation, statement, S, error rate, binomial p, quadrant counts, Pearson r |
+| `relations.csv` | One row per related gene pair: relation, statement, S, error rate, binomial p, quadrant counts, Pearson r over samples observed for both genes |
 | `genes.csv` | Threshold, margin, step R2, fractions low/intermediate/high, filter result, cluster, relations by type, group statistics |
 | `cluster_relations.csv` | Cluster-level relations with support and purity |
 | `gene_network.png`, `.pdf` | Gene network coloured by cluster |
-| `gene_network_by_group.png`, `.pdf` | Gene network coloured by the group difference |
-| `cluster_network.png`, `.pdf` and `cluster_network_by_group.png`, `.pdf` | Cluster networks; node labels give the cluster size |
+| `gene_network_by_group.png`, `.pdf` | Gene network coloured by the group difference (two groups only) |
+| `cluster_network.png`, `.pdf` and `cluster_network_by_group.png`, `.pdf` | Cluster networks; node labels give the cluster size (the second only for two groups) |
 | `gene_network.html`, `cluster_network.html` | Standalone viewers: zoom, filter relation types, search, click a node to list its relations |
 | `gene_network.graphml`, `cluster_network.graphml` | For Cytoscape or Gephi |
 | `relation_counts.png` | Observed and permuted counts per relation type, with FDR |
 | `relation_examples.png` | Strongest example of each relation type, between clusters where possible |
-| `stepminer_examples.png` | Example thresholds, including a gene that fails the dynamic-range filter |
+| `stepminer_examples.png` | Example thresholds, including a gene that fails the dynamic-range filter if there is one |
 | `config.json` | All settings of the run |
 
 Network figures show at most the `--max-plot-edges` (default 3000) strongest relations, and gene labels are drawn for networks of up to 200 genes. The HTML viewers need no internet connection.
@@ -112,7 +113,7 @@ cluster_edges = cluster_relations(relations, labels, clusters)
 
 ## Tests
 
-`python tests/test_birgraph.py` (or `pytest tests`) checks the StepMiner search against the original quadratic search, recovery of planted relations and clusters in synthetic data (`tests/synthetic.py`), that `--margin-sd` gives the same relations after rescaling each gene, the network layout, the preparation of the mice data on a mock table with the same layout, and a full command-line run.
+`python tests/test_birgraph.py` (or `pytest tests`) checks the StepMiner search against the original quadratic search, recovery of planted relations and clusters in synthetic data (`tests/synthetic.py`), that `--margin-sd` gives the same relations after rescaling each gene, Pearson r with missing values, the network layout, the preparation of the mice data on a mock table with the same layout, and command-line runs with the main options, including a table in which no gene passes the dynamic-range filter.
 
 ## Package layout
 
@@ -133,6 +134,7 @@ tests/                           checks and synthetic test data
 
 ## References
 
+- BIRDNet: Mining and Encoding Boolean Implication Knowledge Graphs as Interpretable Deep Neural Networks. arXiv:2605.28739, 2026.
 - Sahoo D, Dill DL, Tibshirani R, Plevritis SK. Extracting binary signals from microarray time-course data. Nucleic Acids Research 35(11):3705-3712, 2007. https://doi.org/10.1093/nar/gkm284
 - Sahoo D, Dill DL, Gentles AJ, Tibshirani R, Plevritis SK. Boolean implication networks derived from large scale, whole genome microarray datasets. Genome Biology 9:R157, 2008. https://doi.org/10.1186/gb-2008-9-10-r157
 - Sahoo D. The power of Boolean implication networks. Frontiers in Physiology 3:276, 2012. https://doi.org/10.3389/fphys.2012.00276

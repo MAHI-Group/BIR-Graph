@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gene network: mice_protein_mouse_level.xlsx</title>
+<style>
+:root { --ink: #1d2733; --muted: #5b6674; --panel: #f1f3f6; --rule: #d6dbe2; }
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; display: grid; grid-template-columns: 300px 1fr;
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--ink); }
+aside { background: var(--panel); border-right: 1px solid var(--rule); padding: 20px 18px; overflow: auto; }
+h1 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.meta, .hint { color: var(--muted); }
+.meta { margin: 0 0 18px; }
+.hint { font-size: 12px; }
+fieldset { border: 0; margin: 0 0 18px; padding: 0; }
+legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+input[type=search] { width: 100%; padding: 6px 8px; font: inherit; border: 1px solid var(--rule); border-radius: 4px; }
+label.kind { display: grid; grid-template-columns: 18px 30px 1fr; align-items: center; gap: 6px; padding: 3px 0; cursor: pointer; }
+.swatch { height: 0; border-top-width: 3px; }
+#selected { border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 4px; }
+.info { font-size: 13px; margin-bottom: 8px; }
+.rels { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.rels li { border-left: 3px solid; padding: 1px 0 1px 7px; margin-bottom: 3px; }
+main { position: relative; overflow: hidden; background: #fff; }
+svg { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+svg text { font-size: 7px; fill: var(--ink); pointer-events: none; text-anchor: middle; dominant-baseline: central;
+  paint-order: stroke; stroke: #fff; stroke-width: 2px; stroke-linejoin: round; }
+.faded { opacity: 0.1; }
+.tip { position: absolute; display: none; pointer-events: none; max-width: 280px; background: #fff;
+  border: 1px solid var(--rule); border-radius: 4px; padding: 8px 10px; font-size: 12px; box-shadow: 0 2px 10px rgba(29, 39, 51, 0.12); }
+.tip strong { display: block; font-size: 13px; margin-bottom: 2px; }
+@media (max-width: 720px) { body { grid-template-columns: 1fr; grid-template-rows: auto 70vh; height: auto; } }
+</style>
+</head>
+<body>
+<aside>
+  <h1>Gene network: mice_protein_mouse_level.xlsx</h1>
+  <p class="meta" id="meta"></p>
+  <fieldset>
+    <legend><label for="search">Find a node</label></legend>
+    <input type="search" id="search" list="names" placeholder="Type a name and press Enter">
+    <datalist id="names"></datalist>
+  </fieldset>
+  <fieldset id="kinds"><legend>Relations shown</legend></fieldset>
+  <p class="hint">Scroll to zoom and drag to pan. Click a node to focus on its neighbourhood and list its relations; click empty space or press Escape to reset.</p>
+  <section id="selected" hidden>
+    <h2 id="sel-name"></h2>
+    <div class="info" id="sel-info"></div>
+    <ul class="rels" id="sel-rels"></ul>
+  </section>
+</aside>
+<main>
+  <svg id="net" role="img" aria-label="Boolean implication network">
+    <defs id="defs"></defs>
+    <g id="view"><g id="edges"></g><g id="nodes"></g></g>
+  </svg>
+  <div class="tip" id="tip"></div>
+</main>
+<script>
+const DATA = {"width": 501.0, "height": 498.9, "labels": true, "nodes": [{"id": "DYRK1A", "x": 129.35, "y": 298.55, "r": 5.48, "c": "#ffffb3", "info": {"cluster": "C2", "relations": 4, "threshold": "-1.28", "fraction high": "0.28", "mean difference (Ts65Dn - Control)": "0.24", "q value": "0.19"}}, {"id": "ITSN1", "x": 164.54, "y": 308.56, "r": 4.74, "c": "#ffffb3", "info": {"cluster": "C2", "relations": 2, "threshold": "-0.71", "fraction high": "0.29", "mean difference (Ts65Dn - Control)": "0.26", "q value": "0.025"}}, {"id": "BDNF", "x": 108.71, "y": 392.91, "r": 4.74, "c": "#C9CED4", "info": {"cluster": "C4", "relations": 2, "threshold": "-1.64", "fraction high": "0.36", "mean difference (Ts65Dn - Control)": "-0.02", "q value": "0.83"}}, {"id": "NR1", "x": 91.85, "y": 149.52, "r": 4.74, "c": "#C9CED4", "info": {"cluster": "C5", "relations": 2, "threshold": "1.13", "fraction high": "0.65", "mean difference (Ts65Dn - Control)": "-0.05", "q value": "0.51"}}, {"id": "pAKT", "x": 220.43, "y": 139.77, "r": 6.71, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 8, "threshold": "-2.17", "fraction high": "0.51", "mean difference (Ts65Dn - Control)": "0.05", "q value": "0.83"}}, {"id": "pBRAF", "x": 265.78, "y": 112.49, "r": 6.12, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 6, "threshold": "-2.52", "fraction high": "0.60", "mean difference (Ts65Dn - Control)": "0.01", "q value": "0.99"}}, {"id": "pCREB", "x": 307.41, "y": 219.5, "r": 4.74, "c": "#C9CED4", "info": {"cluster": "C8", "relations": 2, "threshold": "-2.29", "fraction high": "0.54", "mean difference (Ts65Dn - Control)": "0.08", "q value": "0.29"}}, {"id": "pELK", "x": 52.33, "y": 287.73, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C9", "relations": 1, "threshold": "0.53", "fraction high": "0.31", "mean difference (Ts65Dn - Control)": "0.01", "q value": "0.66"}}, {"id": "pERK", "x": 134.37, "y": 265.07, "r": 5.81, "c": "#ffffb3", "info": {"cluster": "C2", "relations": 5, "threshold": "-0.96", "fraction high": "0.35", "mean difference (Ts65Dn - Control)": "0.05", "q value": "0.86"}}, {"id": "pJNK", "x": 323.96, "y": 58.47, "r": 5.12, "c": "#C9CED4", "info": {"cluster": "C10", "relations": 3, "threshold": "-1.82", "fraction high": "0.74", "mean difference (Ts65Dn - Control)": "-0.00", "q value": "0.94"}}, {"id": "PKCA", "x": 160.75, "y": 394.97, "r": 4.74, "c": "#C9CED4", "info": {"cluster": "C11", "relations": 2, "threshold": "-1.66", "fraction high": "0.39", "mean difference (Ts65Dn - Control)": "-0.00", "q value": "0.97"}}, {"id": "pMEK", "x": 284.4, "y": 151.63, "r": 6.71, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 8, "threshold": "-1.95", "fraction high": "0.60", "mean difference (Ts65Dn - Control)": "0.04", "q value": "0.83"}}, {"id": "pNR1", "x": 52.33, "y": 174.43, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C12", "relations": 1, "threshold": "-0.32", "fraction high": "0.60", "mean difference (Ts65Dn - Control)": "-0.08", "q value": "0.29"}}, {"id": "pNR2A", "x": 267.07, "y": 392.28, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C13", "relations": 1, "threshold": "-0.57", "fraction high": "0.54", "mean difference (Ts65Dn - Control)": "-0.18", "q value": "0.28"}}, {"id": "pPKCAB", "x": 217.16, "y": 394.45, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C15", "relations": 1, "threshold": "0.64", "fraction high": "0.33", "mean difference (Ts65Dn - Control)": "0.02", "q value": "0.87"}}, {"id": "BRAF", "x": 126.69, "y": 329.68, "r": 5.12, "c": "#ffffb3", "info": {"cluster": "C2", "relations": 3, "threshold": "-1.28", "fraction high": "0.19", "mean difference (Ts65Dn - Control)": "0.14", "q value": "0.44"}}, {"id": "CAMKII", "x": 253.51, "y": 146.96, "r": 5.48, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 4, "threshold": "-1.55", "fraction high": "0.64", "mean difference (Ts65Dn - Control)": "-0.03", "q value": "0.53"}}, {"id": "CREB", "x": 238.64, "y": 91.93, "r": 5.48, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 4, "threshold": "-2.53", "fraction high": "0.58", "mean difference (Ts65Dn - Control)": "0.03", "q value": "0.73"}}, {"id": "JNK", "x": 231.68, "y": 175.8, "r": 5.81, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 5, "threshold": "-2.16", "fraction high": "0.74", "mean difference (Ts65Dn - Control)": "0.02", "q value": "1"}}, {"id": "MEK", "x": 299.18, "y": 112.96, "r": 5.48, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 4, "threshold": "-1.96", "fraction high": "0.60", "mean difference (Ts65Dn - Control)": "0.03", "q value": "0.83"}}, {"id": "TRKA", "x": 117.72, "y": 52.33, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C21", "relations": 1, "threshold": "-0.61", "fraction high": "0.57", "mean difference (Ts65Dn - Control)": "0.05", "q value": "0.57"}}, {"id": "RSK", "x": 199.55, "y": 113.99, "r": 6.42, "c": "#8dd3c7", "info": {"cluster": "C1", "relations": 7, "threshold": "-2.66", "fraction high": "0.60", "mean difference (Ts65Dn - Control)": "0.01", "q value": "0.92"}}, {"id": "Bcatenin", "x": 133.5, "y": 110.41, "r": 5.12, "c": "#C9CED4", "info": {"cluster": "C23", "relations": 3, "threshold": "1.04", "fraction high": "0.51", "mean difference (Ts65Dn - Control)": "0.00", "q value": "0.86"}}, {"id": "SOD1", "x": 211.63, "y": 346.71, "r": 5.12, "c": "#C9CED4", "info": {"cluster": "C24", "relations": 3, "threshold": "-1.03", "fraction high": "0.43", "mean difference (Ts65Dn - Control)": "0.03", "q value": "0.97"}}, {"id": "MTOR", "x": 369.06, "y": 390.11, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C25", "relations": 1, "threshold": "-1.20", "fraction high": "0.49", "mean difference (Ts65Dn - Control)": "-0.10", "q value": "0.19"}}, {"id": "P38", "x": 267.74, "y": 267.37, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C26", "relations": 1, "threshold": "-1.33", "fraction high": "0.47", "mean difference (Ts65Dn - Control)": "-0.12", "q value": "0.28"}}, {"id": "pMTOR", "x": 323.49, "y": 392.28, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C27", "relations": 1, "threshold": "-0.47", "fraction high": "0.56", "mean difference (Ts65Dn - Control)": "-0.11", "q value": "0.47"}}, {"id": "NR2B", "x": 421.14, "y": 390.11, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C30", "relations": 1, "threshold": "-0.91", "fraction high": "0.65", "mean difference (Ts65Dn - Control)": "-0.10", "q value": "0.19"}}, {"id": "pNUMB", "x": 54.5, "y": 395.12, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C31", "relations": 1, "threshold": "-1.50", "fraction high": "0.42", "mean difference (Ts65Dn - Control)": "-0.01", "q value": "0.97"}}, {"id": "RAPTOR", "x": 56.67, "y": 446.53, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C32", "relations": 1, "threshold": "-1.66", "fraction high": "0.35", "mean difference (Ts65Dn - Control)": "-0.05", "q value": "0.51"}}, {"id": "TIAM1", "x": 115.26, "y": 446.53, "r": 4.33, "c": "#C9CED4", "info": {"cluster": "C33", "relations": 1, "threshold": "-1.21", "fraction high": "0.26", "mean difference (Ts65Dn - Control)": "0.06", "q value": "0.51"}}, {"id": "ARC", "x": 371.88, "y": 298.17, "r": 5.48, "c": "#bebada", "info": {"cluster": "C3", "relations": 4, "threshold": "-3.07", "fraction high": "0.44", "mean difference (Ts65Dn - Control)": "-0.05", "q value": "0.48"}}, {"id": "ERBB4", "x": 448.27, "y": 284.42, "r": 4.74, "c": "#C9CED4", "info": {"cluster": "C45", "relations": 2, "threshold": "-2.68", "fraction high": "0.39", "mean difference (Ts65Dn - Control)": "0.01", "q value": "1"}}, {"id": "IL1B", "x": 308.97, "y": 284.12, "r": 5.12, "c": "#C9CED4", "info": {"cluster": "C51", "relations": 3, "threshold": "-0.94", "fraction high": "0.44", "mean difference (Ts65Dn - Control)": "-0.04", "q value": "0.48"}}, {"id": "SNCA", "x": 387.89, "y": 279.77, "r": 5.12, "c": "#bebada", "info": {"cluster": "C3", "relations": 3, "threshold": "-2.66", "fraction high": "0.46", "mean difference (Ts65Dn - Control)": "-0.05", "q value": "0.55"}}, {"id": "pS6", "x": 372.89, "y": 262.9, "r": 5.48, "c": "#bebada", "info": {"cluster": "C3", "relations": 4, "threshold": "-3.07", "fraction high": "0.44", "mean difference (Ts65Dn - Control)": "-0.05", "q value": "0.48"}}, {"id": "CaNA", "x": 226.95, "y": 296.94, "r": 5.12, "c": "#C9CED4", "info": {"cluster": "C65", "relations": 3, "threshold": "0.35", "fraction high": "0.40", "mean difference (Ts65Dn - Control)": "0.03", "q value": "0.83"}}], "edges": [{"s": "DYRK1A", "t": "SOD1", "k": "HL"}, {"s": "DYRK1A", "t": "ITSN1", "k": "EQ"}, {"s": "DYRK1A", "t": "pERK", "k": "EQ"}, {"s": "DYRK1A", "t": "BRAF", "k": "EQ"}, {"s": "ITSN1", "t": "pERK", "k": "HH"}, {"s": "BDNF", "t": "PKCA", "k": "HH"}, {"s": "BDNF", "t": "pNUMB", "k": "HH"}, {"s": "pAKT", "t": "RSK", "k": "HH"}, {"s": "pAKT", "t": "CAMKII", "k": "HH"}, {"s": "pAKT", "t": "pJNK", "k": "HH"}, {"s": "pAKT", "t": "JNK", "k": "HH"}, {"s": "pAKT", "t": "MEK", "k": "HH"}, {"s": "pAKT", "t": "pMEK", "k": "EQ"}, {"s": "pAKT", "t": "pBRAF", "k": "EQ"}, {"s": "pAKT", "t": "CREB", "k": "EQ"}, {"s": "pBRAF", "t": "CAMKII", "k": "HH"}, {"s": "pBRAF", "t": "pJNK", "k": "HH"}, {"s": "pBRAF", "t": "pMEK", "k": "EQ"}, {"s": "pBRAF", "t": "CREB", "k": "EQ"}, {"s": "pBRAF", "t": "RSK", "k": "EQ"}, {"s": "pCREB", "t": "RSK", "k": "HH"}, {"s": "pCREB", "t": "JNK", "k": "HH"}, {"s": "pERK", "t": "CaNA", "k": "HH"}, {"s": "pERK", "t": "SOD1", "k": "OP"}, {"s": "pMEK", "t": "pJNK", "k": "HH"}, {"s": "pMEK", "t": "CAMKII", "k": "HH"}, {"s": "pMEK", "t": "JNK", "k": "HH"}, {"s": "pMEK", "t": "CREB", "k": "EQ"}, {"s": "pMEK", "t": "RSK", "k": "EQ"}, {"s": "pMEK", "t": "MEK", "k": "EQ"}, {"s": "pNR1", "t": "NR1", "k": "HH"}, {"s": "pNR2A", "t": "pMTOR", "k": "HH"}, {"s": "pPKCAB", "t": "PKCA", "k": "HH"}, {"s": "BRAF", "t": "pERK", "k": "HH"}, {"s": "BRAF", "t": "pELK", "k": "HH"}, {"s": "CAMKII", "t": "RSK", "k": "EQ"}, {"s": "CREB", "t": "RSK", "k": "EQ"}, {"s": "JNK", "t": "MEK", "k": "EQ"}, {"s": "JNK", "t": "RSK", "k": "EQ"}, {"s": "Bcatenin", "t": "NR1", "k": "HH"}, {"s": "Bcatenin", "t": "TRKA", "k": "HH"}, {"s": "Bcatenin", "t": "MEK", "k": "HH"}, {"s": "SOD1", "t": "CaNA", "k": "OP"}, {"s": "MTOR", "t": "NR2B", "k": "HH"}, {"s": "P38", "t": "CaNA", "k": "LH"}, {"s": "TIAM1", "t": "RAPTOR", "k": "HH"}, {"s": "ARC", "t": "pS6", "k": "EQ"}, {"s": "ARC", "t": "SNCA", "k": "EQ"}, {"s": "ERBB4", "t": "ARC", "k": "HH"}, {"s": "ERBB4", "t": "pS6", "k": "HH"}, {"s": "IL1B", "t": "ARC", "k": "HH"}, {"s": "IL1B", "t": "SNCA", "k": "HH"}, {"s": "IL1B", "t": "pS6", "k": "HH"}, {"s": "SNCA", "t": "pS6", "k": "EQ"}], "kinds": {"EQ": {"label": "Equivalent", "colour": "#009E73", "style": "solid", "dash": "", "directed": false, "template": "{s} equivalent {t}", "count": 19}, "OP": {"label": "Opposite", "colour": "#D55E00", "style": "solid", "dash": "", "directed": false, "template": "{s} opposite {t}", "count": 2}, "HH": {"label": "X high => Y high (arrow X to Y)", "colour": "#0072B2", "style": "solid", "dash": "", "directed": true, "template": "{s} high => {t} high", "count": 31}, "HL": {"label": "high => low (rarely both high)", "colour": "#CC79A7", "style": "dashed", "dash": "6 4", "directed": false, "template": "{s} high => {t} low", "count": 1}, "LH": {"label": "low => high (rarely both low)", "colour": "#E69F00", "style": "dotted", "dash": "2 3", "directed": false, "template": "{s} low => {t} high", "count": 1}}};
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("net");
+const view = document.getElementById("view");
+const tip = document.getElementById("tip");
+const kindOrder = Object.keys(DATA.kinds);
+const byId = new Map(DATA.nodes.map(n => [n.id, n]));
+const adj = new Map(DATA.nodes.map(n => [n.id, new Set()]));
+DATA.edges.forEach(e => { adj.get(e.s).add(e.t); adj.get(e.t).add(e.s); });
+document.getElementById("meta").textContent = `${DATA.nodes.length} nodes, ${DATA.edges.length} relations`;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const statement = e => DATA.kinds[e.k].template.replace("{s}", () => e.s).replace("{t}", () => e.t);
+function make(tag, attrs, parent) {
+  const x = document.createElementNS(NS, tag);
+  for (const a in attrs) x.setAttribute(a, attrs[a]);
+  if (parent) parent.appendChild(x);
+  return x;
+}
+
+for (const [k, s] of Object.entries(DATA.kinds)) {
+  if (!s.directed) continue;
+  const m = make("marker", {id: "arrow-" + k, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto"}, document.getElementById("defs"));
+  make("path", {d: "M0,0 L10,5 L0,10 z", fill: s.colour}, m);
+}
+
+const edgeLayer = document.getElementById("edges");
+const edgeEls = DATA.edges.map(e => {
+  const a = byId.get(e.s), b = byId.get(e.t), s = DATA.kinds[e.k];
+  const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+  const cut = s.directed ? b.r + 1 : 0;
+  const line = make("line", {x1: a.x, y1: a.y, x2: b.x - dx / len * cut, y2: b.y - dy / len * cut,
+    stroke: s.colour, "stroke-width": 1.4, "stroke-opacity": 0.8}, edgeLayer);
+  if (s.dash) line.setAttribute("stroke-dasharray", s.dash);
+  if (s.directed) line.setAttribute("marker-end", `url(#arrow-${e.k})`);
+  line.dataset.k = e.k;
+  line.dataset.s = e.s;
+  line.dataset.t = e.t;
+  return line;
+});
+
+const nodeLayer = document.getElementById("nodes");
+const nodeEls = DATA.nodes.map(n => {
+  const g = make("g", {transform: `translate(${n.x},${n.y})`}, nodeLayer);
+  make("circle", {r: n.r, fill: n.c, stroke: "#27313c", "stroke-width": 0.6}, g);
+  if (DATA.labels) make("text", {}, g).textContent = n.id;
+  g.dataset.id = n.id;
+  g.style.cursor = "pointer";
+  g.addEventListener("pointermove", ev => showTip(ev, n));
+  g.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+  g.addEventListener("click", ev => { ev.stopPropagation(); setFocus(n.id); });
+  return g;
+});
+
+function showTip(ev, n) {
+  const rows = Object.entries(n.info).map(([k, v]) => `<div>${esc(k)}: ${esc(v)}</div>`).join("");
+  tip.innerHTML = `<strong>${esc(n.id)}</strong>${rows}`;
+  const box = svg.getBoundingClientRect();
+  tip.style.left = Math.max(0, Math.min(ev.clientX - box.left + 14, box.width - 290)) + "px";
+  tip.style.top = (ev.clientY - box.top + 14) + "px";
+  tip.style.display = "block";
+}
+
+const hidden = new Set();
+let focused = null;
+function refresh() {
+  const near = focused ? new Set([focused, ...adj.get(focused)]) : null;
+  edgeEls.forEach(l => {
+    l.style.display = hidden.has(l.dataset.k) ? "none" : "";
+    l.classList.toggle("faded", !!near && l.dataset.s !== focused && l.dataset.t !== focused);
+  });
+  nodeEls.forEach(g => g.classList.toggle("faded", !!near && !near.has(g.dataset.id)));
+}
+
+function setFocus(id) {
+  focused = id;
+  refresh();
+  const panel = document.getElementById("selected");
+  if (!id) { panel.hidden = true; return; }
+  const n = byId.get(id);
+  document.getElementById("sel-name").textContent = n.id;
+  document.getElementById("sel-info").replaceChildren(...Object.entries(n.info).map(([k, v]) => {
+    const d = document.createElement("div");
+    d.textContent = `${k}: ${v}`;
+    return d;
+  }));
+  const rels = DATA.edges.filter(e => e.s === id || e.t === id)
+    .sort((a, b) => kindOrder.indexOf(a.k) - kindOrder.indexOf(b.k));
+  const items = rels.slice(0, 200).map(e => {
+    const li = document.createElement("li");
+    li.textContent = statement(e);
+    li.style.borderLeftColor = DATA.kinds[e.k].colour;
+    return li;
+  });
+  if (rels.length > 200) {
+    const li = document.createElement("li");
+    li.textContent = `and ${rels.length - 200} more`;
+    items.push(li);
+  }
+  document.getElementById("sel-rels").replaceChildren(...items);
+  panel.hidden = false;
+}
+
+const kindBox = document.getElementById("kinds");
+for (const [k, s] of Object.entries(DATA.kinds)) {
+  const lab = document.createElement("label");
+  lab.className = "kind";
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.checked = true;
+  cb.addEventListener("change", () => { cb.checked ? hidden.delete(k) : hidden.add(k); refresh(); });
+  const sw = document.createElement("span");
+  sw.className = "swatch";
+  sw.style.borderTopStyle = s.style;
+  sw.style.borderTopColor = s.colour;
+  lab.append(cb, sw, document.createTextNode(`${s.label} (${s.count})`));
+  kindBox.appendChild(lab);
+}
+
+let k = 1, kFit = 1, tx = 0, ty = 0, drag = null, moved = false;
+const kMax = () => Math.max(kFit * 40, 8);
+const apply = () => view.setAttribute("transform", `translate(${tx},${ty}) scale(${k})`);
+function fit() {
+  const box = svg.getBoundingClientRect();
+  kFit = Math.min(box.width / DATA.width, box.height / DATA.height) * 0.96;
+  k = kFit;
+  tx = (box.width - DATA.width * k) / 2;
+  ty = (box.height - DATA.height * k) / 2;
+  apply();
+}
+svg.addEventListener("wheel", ev => {
+  ev.preventDefault();
+  const box = svg.getBoundingClientRect(), mx = ev.clientX - box.left, my = ev.clientY - box.top;
+  const nk = Math.min(kMax(), Math.max(kFit * 0.5, k * Math.exp(-ev.deltaY * 0.0015)));
+  tx = mx - (mx - tx) * nk / k;
+  ty = my - (my - ty) * nk / k;
+  k = nk;
+  apply();
+}, {passive: false});
+svg.addEventListener("pointerdown", ev => {
+  drag = {x: ev.clientX - tx, y: ev.clientY - ty, x0: ev.clientX, y0: ev.clientY};
+  moved = false;
+  svg.style.cursor = "grabbing";
+});
+window.addEventListener("pointermove", ev => {
+  if (!drag) return;
+  tx = ev.clientX - drag.x;
+  ty = ev.clientY - drag.y;
+  moved = moved || Math.hypot(ev.clientX - drag.x0, ev.clientY - drag.y0) > 3;
+  apply();
+});
+window.addEventListener("pointerup", () => { drag = null; svg.style.cursor = "grab"; });
+svg.addEventListener("click", () => { if (!moved) setFocus(null); });
+window.addEventListener("keydown", ev => { if (ev.key === "Escape") setFocus(null); });
+
+const list = document.getElementById("names");
+DATA.nodes.forEach(n => { const o = document.createElement("option"); o.value = n.id; list.appendChild(o); });
+document.getElementById("search").addEventListener("change", ev => {
+  const n = byId.get(ev.target.value.trim());
+  if (!n) return;
+  const box = svg.getBoundingClientRect();
+  k = Math.min(kMax(), Math.max(k, 1.5));
+  tx = box.width / 2 - n.x * k;
+  ty = box.height / 2 - n.y * k;
+  apply();
+  setFocus(n.id);
+});
+
+window.addEventListener("resize", fit);
+fit();
+</script>
+</body>
+</html>
